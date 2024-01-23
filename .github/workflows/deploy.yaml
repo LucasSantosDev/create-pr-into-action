@@ -1,0 +1,36 @@
+name: Deploy Default
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  check_merge:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Check PR
+        id: pr
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branchName = github.event.pull_request.head.ref;
+            const targetBranch = github.event.pull_request.base.ref;
+  
+            if (branchName.startsWith('release/') && targetBranch === 'main' && github.event.pull_request.merged) {
+              core.setOutput('merged', 'true');
+            } else {
+              core.setOutput('merged', 'false');
+            }
+      
+      - name: Create PR
+        if: steps.pr.outputs.merged == 'true'
+        run: |
+          release_branch=github.event.pull_request.head.ref
+          develop_branch="develop"
+          git checkout -b merged-$release_branch
+          git push origin merged-$release_branch
