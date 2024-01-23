@@ -13,6 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Check PR
+        if: github.event_name == 'pull_request'
         id: pr
         uses: actions/github-script@v5
         with:
@@ -30,7 +31,7 @@ jobs:
       - name: Create PR
         if: steps.pr.outputs.merged == 'true'
         run: |
-          release_branch=github.event.pull_request.head.ref
+          release_branch=${{ github.event.pull_request.head.ref }}
           develop_branch="develop"
           git checkout -b merged-$release_branch
           git push origin merged-$release_branch
