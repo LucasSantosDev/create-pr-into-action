@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Check PR
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.merged == true
         id: pr
         uses: actions/github-script@v5
         with:
@@ -29,7 +29,7 @@ jobs:
             }
       
       - name: Create PR
-        if: steps.pr.outputs.merged == 'true'
+        if: steps.pr.outputs.merged == 'true' && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.merged == true
         run: |
           release_branch=${{ github.event.pull_request.head.ref }}
           develop_branch="develop"
